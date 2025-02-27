@@ -1,6 +1,6 @@
 {
   "name": "@udawg00/back-stage",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "A utility package for Typescript and Javascript for advanced, formatted logging for debugging purposes.",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
