@@ -1,3 +1,7 @@
 src/
+tsconfig.json
+tsup.config.ts
+node_modules/
+tests/
 testing.ts
 testing.js
