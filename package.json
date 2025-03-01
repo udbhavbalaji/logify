@@ -32,7 +32,11 @@
   },
   "homepage": "https://github.com/udbhavbalaji/logify#readme",
   "devDependencies": {
+    "@types/node": "^22.13.8",
     "tsup": "^8.4.0",
     "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1"
   }
 }
