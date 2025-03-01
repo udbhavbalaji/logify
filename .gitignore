@@ -128,3 +128,10 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# User defined Ignores
+dist/
+debug_logs/
+node_modules/
+testing.ts
+testing.js
