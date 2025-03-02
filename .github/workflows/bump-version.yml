@@ -3,9 +3,9 @@ name: Bump NPM package version
 on:
   push:
     branches:
-    - main
+      - main
     paths-ignore:
-    - '**.md'
+      - '**.md'
 
 jobs:
   bump-version:
