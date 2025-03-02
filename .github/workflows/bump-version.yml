@@ -9,7 +9,7 @@ on:
 
 jobs:
   bump-version:
-    runs-on: ubunut-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout main branch
         uses: actions/checkout@v4
