@@ -48,5 +48,5 @@ jobs:
 
           gh pr create --base deploy --head main --title "Merge main into deploy after version bump" --body "Automated merge from main into deploy after version bump"
         env:
-        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
