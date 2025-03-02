@@ -1,0 +1,52 @@
+name: Bump NPM package version
+
+on:
+  push:
+    branches:
+    - main
+    paths-ignore:
+    - '**.md'
+
+jobs:
+  bump-version:
+    runs-on: ubunut-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+
+      - name: Get Current & Published Versions
+        id: version-check
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          PUBLISHED_VERSION=$(npm show $(node -p "require('./package.json').name") version || echo "0.0.0")
+
+          echo "Current Version: $CURRENT_VERSION"
+          echo "Published Version: $PUBLISHED_VERSION"
+
+          echo "current_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "published_version=$PUBLISHED_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Bump Version & Create Pull Request
+        if: steps.version-check.outputs.current_version == steps.version-check.outputs.published_version
+        run: |
+          npm version patch -m "Bump version to %s [skip ci]"
+          git add package.json
+          git commit -m "Bump version to $(node -p "require('./package.json').version") [skip ci]"
+          git push origin main
+
+          REPO=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 2)
+          OWNER=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 1)
+
+          gh pr create --base deploy --head main --title "Merge main into deploy after version bump" --body "Automated merge from main into deploy after version bump"
+        env:
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
