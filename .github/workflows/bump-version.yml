@@ -35,24 +35,65 @@ jobs:
           echo "current_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
           echo "published_version=$PUBLISHED_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Bump Version & Create Pull Request
-        if: steps.version-check.outputs.current_version == steps.version-check.outputs.published_version
+      - name: Check if Version Bump is Needed
+        id: version-bump-needed
         run: |
-          npm version patch -m "Bump version to %s [skip ci]"
+          CURRENT_VERSION="${{ steps.version-check.outputs.current_version }}"
+          PUBLISHED_VERSION="${{ steps.version-check.outputs.published_version }}"
 
-          if git diff --quiet --exit-code package.json; then
-            echo "package.json was not modified (version already up-to-date)."
-            exit 0  # Exit the script successfully
+          if [ "$CURRENT_VERSION" != "$PUBLISHED_VERSION" ]; then
+            echo "version_bump=true" >> $GITHUB_OUTPUT
+          else
+            echo "version_bump=false" >> $GITHUB_OUTPUT
           fi
-          
-          git add package.json
-          git commit -m "Bump version to $(node -p "require('./package.json').version") [skip ci]"
-          git push
+
+      - name: Bump Version & Create Pull Request
+        run: |
+          if [ "${{ steps.version-bump-needed.outputs.version_bump }}" = "true" ]; then
+            npm version patch -m "Bump version to %s [skip ci]"
+
+            if git diff --quiet --exit-code package.json; then
+              echo "package.json was not modified (version already up-to-date)."
+              VERSION_UPDATED=false
+            else
+              VERSION_UPDATED=true
+            fi
+
+            if [ "$VERSION_UPDATED" = true ]; then
+              git add package.json
+              git commit -m "Bump version to $(node -p "require('./package.json').version") [skip ci]"
+              git push
+            else
+              echo "No version update needed, skipping git push."
+            fi
+          else
+            echo "Version bump not needed"
+          fi
 
           REPO=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 2)
           OWNER=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 1)
-
           gh pr create --base deploy --head main --title "Merge main into deploy after version bump" --body "Automated merge from main into deploy after version bump"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Bump Version & Create Pull Request
+      #   if: steps.version-check.outputs.current_version == steps.version-check.outputs.published_version
+      #   run: |
+      #     npm version patch -m "Bump version to %s [skip ci]"
+      #
+      #     if git diff --quiet --exit-code package.json; then
+      #       echo "package.json was not modified (version already up-to-date)."
+      #       exit 0  # Exit the script successfully
+      #     fi
+      #     
+      #     git add package.json
+      #     git commit -m "Bump version to $(node -p "require('./package.json').version") [skip ci]"
+      #     git push
+      #
+      #     REPO=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 2)
+      #     OWNER=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 1)
+      #
+      #     gh pr create --base deploy --head main --title "Merge main into deploy after version bump" --body "Automated merge from main into deploy after version bump"
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
