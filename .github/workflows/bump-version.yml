@@ -41,7 +41,7 @@ jobs:
           npm version patch -m "Bump version to %s [skip ci]"
           git add package.json
           git commit -m "Bump version to $(node -p "require('./package.json').version") [skip ci]"
-          git push origin main
+          git push
 
           REPO=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 2)
           OWNER=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 1)
