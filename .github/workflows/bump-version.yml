@@ -41,7 +41,7 @@ jobs:
           CURRENT_VERSION="${{ steps.version-check.outputs.current_version }}"
           PUBLISHED_VERSION="${{ steps.version-check.outputs.published_version }}"
 
-          if [ "$CURRENT_VERSION" != "$PUBLISHED_VERSION" ]; then
+          if [ "$CURRENT_VERSION" == "$PUBLISHED_VERSION" ]; then
             echo "version_bump=true" >> $GITHUB_OUTPUT
           else
             echo "version_bump=false" >> $GITHUB_OUTPUT
