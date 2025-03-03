@@ -52,20 +52,22 @@ jobs:
           if [ "${{ steps.version-bump-needed.outputs.version_bump }}" = "true" ]; then
             npm version patch --force -m "Bump version to %s [skip ci]"
 
-            if git diff --quiet --exit-code package.json; then
-              echo "package.json was not modified (version already up-to-date)."
-              VERSION_UPDATED=false
-            else
-              VERSION_UPDATED=true
-            fi
+            git push
 
-            if [ "$VERSION_UPDATED" = true ]; then
-              git add package.json
-              git commit -m "Bump version to $(node -p "require('./package.json').version") [skip ci]"
-              git push
-            else
-              echo "No version update needed, skipping git push."
-            fi
+            # if git diff --quiet --exit-code package.json; then
+            #   echo "package.json was not modified (version already up-to-date)."
+            #   VERSION_UPDATED=false
+            # else
+            #   VERSION_UPDATED=true
+            # fi
+
+            # if [ "$VERSION_UPDATED" = true ]; then
+            #   git add package.json
+            #   git commit -m "Bump version to $(node -p "require('./package.json').version") [skip ci]"
+            #   git push
+            # else
+            #   echo "No version update needed, skipping git push."
+            # fi
           else
             echo "Version bump not needed"
           fi
