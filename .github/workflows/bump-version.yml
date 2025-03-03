@@ -50,7 +50,7 @@ jobs:
       - name: Bump Version & Create Pull Request
         run: |
           if [ "${{ steps.version-bump-needed.outputs.version_bump }}" = "true" ]; then
-            npm version patch -m "Bump version to %s [skip ci]"
+            npm version patch --force -m "Bump version to %s [skip ci]"
 
             if git diff --quiet --exit-code package.json; then
               echo "package.json was not modified (version already up-to-date)."
