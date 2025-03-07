@@ -40,13 +40,20 @@ class Logify {
   private withTime: boolean;
   private logDir: string;
 
-  constructor(options?: Partial<LogifyOptions>) {
-    const mergedOptions = { ...defaultLogifyOptions, ...options };
+  constructor(options: LogifyOptions) {
+    this.level = options.level;
+    this.context = options.context;
+    this.withTime = options.withTime;
+    this.logDir = path.join(findProjectRoot(), options.logDirName);
+  }
 
-    this.level = mergedOptions.level;
-    this.context = mergedOptions.context;
-    this.withTime = mergedOptions.withTime;
-    this.logDir = path.join(findProjectRoot(), mergedOptions.logDirName);
+  private getOptions(): LogifyOptions {
+    return {
+      level: this.level,
+      context: this.context,
+      withTime: this.withTime,
+      logDirName: path.basename(this.logDir),
+    };
   }
 
   private shouldLog(level: LogLevel): boolean {
@@ -113,6 +120,10 @@ class Logify {
     this.context = ctx;
   }
 
+  overrideContext(ctx: string): Logify {
+    return new Logify({ ...this.getOptions(), context: ctx });
+  }
+
   debug(message: string, ...args: any[]): void {
     this.logToConsole("debug", message, ...args);
   }
@@ -130,20 +141,29 @@ class Logify {
   }
 
   debugToFile(message: string): void {
-    this.logToConsole("debug", message);
+    this.logToFile("debug", message);
   }
 
   infoToFile(message: string): void {
-    this.logToConsole("info", message);
+    this.logToFile("info", message);
   }
 
   warnToFile(message: string): void {
-    this.logToConsole("warn", message);
+    this.logToFile("warn", message);
   }
 
   errorToFile(message: string): void {
-    this.logToConsole("error", message);
+    this.logToFile("error", message);
   }
 }
 
-export default Logify;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// INSTANCE CREATOR FUNCTION
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const createLogifier = (options?: Partial<LogifyOptions>): Logify => {
+  const mergedOptions = { ...defaultLogifyOptions, ...options };
+  return new Logify(mergedOptions);
+};
+
+export { Logify, createLogifier as default };
