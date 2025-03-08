@@ -69,7 +69,7 @@ class Logify {
 
   private logToConsole(level: LogLevel, message: string, ...args: any): void {
     if (this.shouldLog(level)) {
-      const formattedMessage = `${this.withTime ? `[${getFormattedDate()} ${getTimestamp()}] ` : ""}${this.context ? `(ctx: ${this.context}) ` : ""}[${level.toUpperCase()}] ${message}`;
+      const formattedMessage = `${this.withTime ? `[${getFormattedDate()} ${getTimestamp()}] ` : ""}${this.context ? `<ctx: ${this.context}> ` : ""}[${level.toUpperCase()}] ${message}`;
 
       switch (level) {
         case "debug": {
@@ -102,7 +102,7 @@ class Logify {
         `${getFormattedDate("")}.log`,
       );
 
-      const logMessage = `${this.withTime ? `[${getFormattedDate()} ${getTimestamp()}] ` : ""}${this.context ? `(ctx: ${this.context}) ` : ""}[${level.toUpperCase()}] ${message}`;
+      const logMessage = `${this.withTime ? `[${getFormattedDate()} ${getTimestamp()}] ` : ""}${this.context ? `<ctx: ${this.context}> ` : ""}[${level.toUpperCase()}] ${message}`;
 
       fs.appendFileSync(logFilePath, logMessage);
     }
