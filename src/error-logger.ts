@@ -1,4 +1,4 @@
-import createLogifier, { type Logify } from "./logify";
+import createLogifier, { type Logify, type LogifyOptions } from "./logify";
 
 type ReturnTypes =
   | Record<string, unknown>
@@ -7,19 +7,25 @@ type ReturnTypes =
   | number
   | boolean
   | void;
-type ErrorHandler<T extends ReturnTypes = ReturnTypes> = (err: Error) => T;
-type ErrorReturnMapping = Record<string, ReturnTypes>;
+
+type ErrorHandler<T = ReturnTypes> = (err: Error) => T;
+
+// type ErrorReturnMapping = Record<string, ReturnTypes>;
+type ErrorReturnMapping<T = ReturnTypes> = Record<string, T>;
+
 type ErrorHandlerMapping<T extends ErrorReturnMapping> = {
   [K in keyof T]: ErrorHandler<T[K]>;
 };
 
-class LogErr<Mapping extends ErrorReturnMapping> {
+// todo: Need to create a helper type that allows a user to define the type
+
+export class ErrorLogifier<Mapping extends ErrorReturnMapping> {
   private logger: Logify;
   private handlers: ErrorHandlerMapping<Mapping>;
 
-  constructor(handlers: ErrorHandlerMapping<Mapping>) {
+  constructor(handlers: ErrorHandlerMapping<Mapping>, logger: Logify) {
     this.handlers = handlers;
-    this.logger = createLogifier({ level: "error", context: "ErrorLog" });
+    this.logger = logger;
   }
 
   private formContextAndMessage(err: Error): {
@@ -33,11 +39,15 @@ class LogErr<Mapping extends ErrorReturnMapping> {
 
   private handleError<K extends keyof Mapping>(errorName: K, err: Error) {
     const handler = this.handlers[errorName];
-    if (!handler) throw new Error("No handler");
+    if (!handler) throw new Error("No handlers");
     try {
-      return handler(err) as any;
-    } catch (err) {
-      throw new Error("Error in handler");
+      return handler(err);
+    } catch (error) {
+      this.logger
+        .overrideContext("ErrorHandlerException")
+        .error(`Error in error handler for ${(error as Error).name}.`);
+      this.logError(error as Error);
+      process.exit(1);
     }
   }
 
@@ -51,40 +61,33 @@ class LogErr<Mapping extends ErrorReturnMapping> {
     this.logger.overrideContext(context).errorToFile(message);
   }
 
-  logAndHandleError<T = unknown>(err: Error) {
+  logAndHandleError(err: Error): unknown;
+  logAndHandleError<K extends keyof Mapping>(err: Error): Mapping[K];
+  logAndHandleError<K extends keyof Mapping>(err: Error): unknown | Mapping[K] {
+    const result = this.handleError(err.name, err) as any;
     this.logError(err);
-    return this.handleError(err.name, err) as T;
+    return result;
   }
 
-  logAndHandleErrorToFile<T = unknown>(err: Error) {
+  logAndHandleErrorToFile(err: Error): unknown;
+  logAndHandleErrorToFile<K extends keyof Mapping>(err: Error): Mapping[K];
+  logAndHandleErrorToFile<K extends keyof Mapping>(
+    err: Error,
+  ): unknown | Mapping[K] {
+    const result = this.handleError(err.name, err) as any;
     this.logErrorToFile(err);
-    return this.handleError(err.name, err) as T;
+    return result;
   }
 }
 
-function createLogErr<Mapping extends ErrorReturnMapping>(
+function createErrorLogifier<Mapping extends ErrorReturnMapping>(
   handlers: ErrorHandlerMapping<Mapping>,
-): LogErr<Mapping> {
-  return new LogErr(handlers);
+  loggerOptions?: Partial<
+    Pick<LogifyOptions, "logDirName" | "withTime" | "context">
+  >,
+): ErrorLogifier<Mapping> {
+  const logger = createLogifier({ ...loggerOptions, level: "error" });
+  return new ErrorLogifier(handlers, logger);
 }
 
-class CA extends Error {
-  constructor(msg: string) {
-    super(msg);
-    this.name = "CA";
-  }
-}
-
-class CB extends Error {
-  constructor(msg: string) {
-    super(msg);
-    this.name = "CB";
-  }
-}
-
-const logerr = new LogErr({
-  CA: (err: CA) => console.log(err.name),
-  CB: (err: CB) => err.name,
-});
-
-const res = logerr.logAndHandleError(new CA("This is CA"));
+export default createErrorLogifier;

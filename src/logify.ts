@@ -15,7 +15,7 @@ import {
 
 type LogLevel = "debug" | "info" | "warn" | "error";
 
-interface LogifyOptions {
+export interface LogifyOptions {
   level: LogLevel;
   context?: string;
   withTime: boolean;
