@@ -12,7 +12,8 @@
   },
   "scripts": {
     "build": "tsup",
-    "test": "vitest"
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",

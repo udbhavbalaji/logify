@@ -19,7 +19,7 @@ type ErrorHandlerMapping<T extends ErrorReturnMapping> = {
 
 // todo: Need to create a helper type that allows a user to define the type
 
-export class ErrorLogifier<Mapping extends ErrorReturnMapping> {
+class ErrorLogifier<Mapping extends ErrorReturnMapping> {
   private logger: Logify;
   private handlers: ErrorHandlerMapping<Mapping>;
 
@@ -39,7 +39,14 @@ export class ErrorLogifier<Mapping extends ErrorReturnMapping> {
 
   private handleError<K extends keyof Mapping>(errorName: K, err: Error) {
     const handler = this.handlers[errorName];
-    if (!handler) throw new Error("No handlers");
+    if (!handler) {
+      this.logger
+        .overrideContext("ErrorHandlerException")
+        .error(
+          `No handler found for ${err.name}. Add it to handler mapping or use logError().`,
+        );
+      return;
+    }
     try {
       return handler(err);
     } catch (error) {
@@ -90,4 +97,4 @@ function createErrorLogifier<Mapping extends ErrorReturnMapping>(
   return new ErrorLogifier(handlers, logger);
 }
 
-export default createErrorLogifier;
+export { createErrorLogifier, ErrorLogifier };

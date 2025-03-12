@@ -1,5 +1,5 @@
 import { getFormattedJSONTypes, getFormattedJSON } from "./utils";
-import Logify from "./logify";
+import createLogifier from "./logify";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HELPERS
@@ -44,7 +44,7 @@ const getDetailedTypes = (
   return { finalReturnType, finalArgTypes };
 };
 
-const logger = new Logify({ level: "debug", context: "InspectionAction" });
+const logger = createLogifier({ level: "debug", context: "InspectionAction" });
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // INSPECTION FUNCTIONS (Exported)
