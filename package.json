@@ -1,6 +1,6 @@
 {
   "name": "@udawg00/logify",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A utility package for Typescript & Javascript, for advanced, formatted logging while debugging.",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
