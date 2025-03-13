@@ -21,9 +21,10 @@ type ErrorHandlerMapping<T extends ErrorReturnMapping> = {
 
 class ErrorLogifier<Mapping extends ErrorReturnMapping> {
   private logger: Logify;
-  private handlers: ErrorHandlerMapping<Mapping>;
+  // todo: need to check if wrapping Partial has broken something
+  private handlers: Partial<ErrorHandlerMapping<Mapping>>;
 
-  constructor(handlers: ErrorHandlerMapping<Mapping>, logger: Logify) {
+  constructor(handlers: Partial<ErrorHandlerMapping<Mapping>>, logger: Logify) {
     this.handlers = handlers;
     this.logger = logger;
   }
@@ -45,7 +46,7 @@ class ErrorLogifier<Mapping extends ErrorReturnMapping> {
         .error(
           `No handler found for ${err.name}. Add it to handler mapping or use logError().`,
         );
-      return;
+      process.exit(1);
     }
     try {
       return handler(err);
@@ -88,13 +89,13 @@ class ErrorLogifier<Mapping extends ErrorReturnMapping> {
 }
 
 function createErrorLogifier<Mapping extends ErrorReturnMapping>(
-  handlers: ErrorHandlerMapping<Mapping>,
+  handlers?: ErrorHandlerMapping<Mapping>,
   loggerOptions?: Partial<
     Pick<LogifyOptions, "logDirName" | "withTime" | "context">
   >,
 ): ErrorLogifier<Mapping> {
   const logger = createLogifier({ ...loggerOptions, level: "error" });
-  return new ErrorLogifier(handlers, logger);
+  return new ErrorLogifier(handlers ?? {}, logger);
 }
 
 export { createErrorLogifier, ErrorLogifier };
