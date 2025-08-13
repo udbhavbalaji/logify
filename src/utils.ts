@@ -29,6 +29,8 @@ const getFormattedJSON = (
     for (const prop of props) {
       if (typeof obj[prop] === "object") {
         output += `${indent}  ${prop}: ${getFormattedJSON(obj[prop], indentLevel + 1)},\n`;
+      } else if (typeof obj[prop] === "string") {
+        output += `${indent}  ${prop}: "${obj[prop]}",\n`;
       } else {
         output += `${indent}  ${prop}: ${obj[prop]},\n`;
       }
