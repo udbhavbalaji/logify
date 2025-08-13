@@ -19,7 +19,7 @@ type ErrorHandlerMapping<T extends ErrorReturnMapping> = {
 
 // todo: Need to create a helper type that allows a user to define the type
 
-class ErrorLogifier<Mapping extends ErrorReturnMapping> {
+class ErrorLogify<Mapping extends ErrorReturnMapping> {
   private logger: Logify;
   // todo: need to check if wrapping Partial has broken something
   private handlers: Partial<ErrorHandlerMapping<Mapping>>;
@@ -88,14 +88,14 @@ class ErrorLogifier<Mapping extends ErrorReturnMapping> {
   }
 }
 
-function createErrorLogifier<Mapping extends ErrorReturnMapping>(
+function createErrorLogify<Mapping extends ErrorReturnMapping>(
   handlers?: ErrorHandlerMapping<Mapping>,
   loggerOptions?: Partial<
     Pick<LogifyOptions, "logDirName" | "withTime" | "context">
   >,
-): ErrorLogifier<Mapping> {
+): ErrorLogify<Mapping> {
   const logger = createLogifier({ ...loggerOptions, level: "error" });
-  return new ErrorLogifier(handlers ?? {}, logger);
+  return new ErrorLogify(handlers ?? {}, logger);
 }
 
-export { createErrorLogifier, ErrorLogifier };
+export { createErrorLogify, ErrorLogify };

@@ -1,6 +1,6 @@
-import Logify from "./logify";
+import createLogify from "./logify";
 export * from "./utils";
 export * from "./inspection";
 export * from "./error-logger";
 
-export default Logify;
+export default createLogify;
